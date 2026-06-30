@@ -8,7 +8,8 @@ print("FLASK USING SUPABASE:", __import__("supabase").__version__)
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"])
+allowed_origins = os.environ.get("FRONTEND_URL", "http://localhost:5173").split(",")
+CORS(app, origins=allowed_origins)
 
 # Import and register routes
 from routes.auth import auth_bp
@@ -30,4 +31,6 @@ def health():
     return {"status": "ok", "message": "AI College Admission Guidance System API"}
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    debug_mode = os.environ.get("FLASK_DEBUG", "true").lower() == "true"
+    app.run(debug=debug_mode, host="0.0.0.0", port=port)

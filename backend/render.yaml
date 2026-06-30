@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: collego-backend
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app --bind 0.0.0.0:$PORT"
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: FLASK_DEBUG
+        value: "false"
