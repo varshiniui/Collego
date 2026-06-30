@@ -1,0 +1,81 @@
+Instead of creating a massive static dataset with thousands of records that become outdated, I created a structured college database and built a recommendation engine that filters colleges based on student profile, cutoff, interests, and budget. This approach is more scalable and maintainable.
+
+## 1. The problem (30 seconds, sets context)
+
+Indian students choosing colleges rely on scattered sources — counselors, forums, word-of-mouth — and don't have one place that tells them, plainly, "given your marks, here's what you're actually eligible for." Collego centralizes that: a student fills out their academic profile once, and the system tells them which colleges and courses they realistically qualify for, lets them track applications, and gives counselors/admins tools to support and monitor that process.
+
+## 2. What you built — three user roles, one platform
+
+- **Students**: profile + academic details, document upload, AI college/course recommendations, eligibility status, application tracking, chat with an AI assistant, saved colleges/courses, downloadable PDF reports, scholarship suggestions, personalized learning paths.
+- **Counselors**: view assigned students, review documents, verify academic info, leave counseling notes, monitor AI recommendations, suggest alternative colleges, message students directly, track admission progress.
+- **Admins**: manage student/counselor/college accounts, configure AI recommendation settings, monitor system activity, and pull 8 different downloadable reports (recommendation accuracy, scholarship eligibility, admission success, etc.).
+
+## 3. Tech stack — and *why* each piece
+Frontend: React + Vite + Tailwind CSS
+
+React because the app has genuinely complex, stateful UI — recommendation lists with filters, message threads, multi-step profile forms — and component reuse (the same LevelBadge, layout shells, card patterns) across three different role-based dashboards made a component framework the obvious choice over plain HTML/JS.
+Vite over Create React App: faster dev server, faster builds, it's the current standard — CRA is effectively deprecated.
+Tailwind for styling: utility classes let you move fast and keep styling consistent across many similar-but-not-identical cards (college cards, course cards, application cards) without writing and maintaining a separate CSS file per component.
+
+Backend: Flask (Python)
+
+Flask, not Django or Node/Express, mainly because the AI/ML side (scikit-learn for TF-IDF interest matching, pandas for CSV bulk uploads, reportlab for PDF generation) is Python-native — keeping the API layer in Python meant no language boundary between the web framework and the recommendation engine.
+Flask specifically over Django: this app didn't need Django's batteries-included ORM/admin/templating — Supabase already handles the database and auth-adjacent concerns, so a lightweight framework with blueprints (one per role: student.py, counselor.py, admin.py, messages.py, ai.py) was a better fit than carrying Django's overhead for features you'd just turn off.
+
+Database + Auth + Storage: Supabase (Postgres)
+
+Real relational data — students, colleges, applications, messages — with actual foreign-key relationships (a recommendation belongs to a student and a college; an application has a status that moves through a defined lifecycle). That's a textbook relational use case, not a fit for a NoSQL document store.
+Supabase specifically because it's Postgres (so all the relational guarantees you actually want) but ships with auth, file storage (used for mark sheet uploads), and a REST layer (PostgREST) generated automatically from the schema — meaning no separate ORM, no writing a storage service from scratch, no separate auth microservice. For a project this size, that's a big reduction in infrastructure to build and maintain, without losing SQL.
+
+AI: Groq (running Llama models)
+
+Used for the genuinely "fuzzy," conversational, language-generation tasks: the admission chatbot, career guidance write-ups, scholarship suggestions, and learning-path generation. These need natural language reasoning over open-ended questions — that's what an LLM is for.
+Groq specifically over OpenAI/Anthropic API directly: Groq runs open models on custom inference hardware (LPUs) that's dramatically faster for token generation — for a chat-style feature where a student is waiting on a response, low latency matters more than marginal quality differences for this kind of task.
+Important distinction to make to HR, because it shows judgment, not just stack-listing: the AI is not used for the actual college-cutoff matching. That's deliberately a rule-based scoring engine (in Python, using real cutoff data, gender eligibility, budget, category-relevance) — because an LLM asked "what's my cutoff cutoff at this college" will confidently invent a plausible-sounding wrong number, which is actively dangerous for a high-stakes decision like college admission. The AI is reserved for language tasks where being approximately right is fine; the eligibility math is deterministic and auditable. That's a real architectural decision, and it's worth stating explicitly — it shows you understand where LLMs are appropriate and where they aren't.
+
+PDF generation: ReportLab
+
+Chosen because the recommendation report needs to be a real downloadable artifact a student can save/print/show a parent or counselor — not just an on-screen list. ReportLab gives full control over layout (colored level badges, structured sections) directly from Python data, without a separate templating/rendering service.
+
+Data analysis: pandas
+
+Used wherever the app needs to read/write tabular data outside the live app flow — bulk CSV college uploads by admins, and the report-generation endpoints that aggregate applications/recommendations into exportable CSVs.
+
+Good — let's focus there. I'll walk through each major feature the way you'd actually explain *how it works under the hood*, since that's what separates "I added a recommendation feature" from showing you understand your own system.
+
+## Feature 1: AI College & Course Recommendations — the core feature
+1. Student fills in academic details — 12th percentage, stream, and if they're in the Computer Science/PCM stream, also Maths/Physics/Chemistry marks.
+2. If PCM, the backend automatically calculates a **TNEA-style cutoff** (`Maths + Physics/2 + Chemistry/2`, out of 200) — the actual formula Tamil Nadu engineering admissions use — rather than just using the raw percentage, since that's what real counseling cutoffs are based on.
+3. When the student clicks "Refresh recommendations," the backend pulls every active college and runs each one through a **rule-based scoring function** — not the AI — that weighs four factors: academic eligibility (40%), category/subject match (25%), college type + state preference (15%), and budget fit (20%).
+4. Each factor produces a 0–1 score with a human-readable reason ("Your TNEA cutoff is well above the 70% requirement"), and the weighted total maps to one of four levels: Highly Recommended, Recommended, Suitable, Alternative Option — plus a separate "Over Budget" tag when cost is the actual blocker, so the label tells the student *why*, not just a vague tier.
+5. **Hard exclusions happen before scoring**: colleges that don't admit the student's gender, colleges in the wrong subject category entirely (a Law college never shows for a Medical-track student, even if academics/budget look great), and colleges the student's marks are far below cutoff for, are removed from the list completely rather than just scored low — because showing them at all would be misleading.
+6. A TF-IDF similarity pass (scikit-learn) gives a small additional boost based on free-text interest matching against course names — this is the one place actual lightweight ML is used in the scoring path itself.
+
+**Course recommendations** work similarly but operate on individual course names parsed out of each college's course list, deduplicated, and scored by whether they match the student's stated interests (with a synonym-expansion map, so "AI" also catches "Machine Learning," "Data Science," "Robotics," etc.) and which colleges offer that course within the student's reach.
+
+If asked **"why not just have the AI do the matching directly"** — this is the question to nail: an LLM doesn't reliably know real cutoff numbers and will fabricate plausible-but-wrong ones. A deterministic engine is auditable (you can always show the exact reason a college appeared) and never invents data.
+
+## Feature 2: Application Tracking
+
+A student can click "Apply" on any recommended college, which creates an application record starting at "Application Started." The student can self-advance it to "Application Submitted," but every later stage — Under Review, Admission Offered, Admission Confirmed, Rejected — can only be set by their assigned counselor. That's a deliberate access-control decision: a student shouldn't be able to mark themselves "Admitted."
+
+## Feature 3: Document Upload
+
+Mark sheets and certificates upload to Supabase Storage (not the database directly — files live in object storage, only metadata like filename and type live in Postgres). Downloads use short-lived signed URLs (5 minutes) rather than public links, since these are personal documents.
+
+## Feature 4: Counselor–Student Messaging
+
+A simple threaded messaging system scoped strictly to assigned pairs — a counselor can only message students actually assigned to them (checked server-side on every request, not just hidden in the UI), with read-receipts and an unread-count badge.
+
+## Feature 5: AI Chatbot, Scholarships, Learning Path
+
+These three are where Groq actually gets used — open-ended, conversational outputs. The chatbot is instructed to ask for missing academic info rather than guess at recommendations with no data. Scholarships and Learning Path take the student's full profile and ask the LLM to generate India-specific, realistic suggestions, formatted into structured sections the frontend can render nicely (not just a wall of text).
+
+**"Why CSV instead of AI knowing the colleges?"**
+"AI can guess wrong on real facts like cutoffs — that's risky for something this important. So I used a fixed, verified dataset instead, to make sure the numbers are always accurate."
+
+**"Why aren't colleges recommended by AI directly?"**
+"Matching cutoffs is just math — comparing numbers — so I used plain logic for that, since it's always 100% correct. I saved the AI for things that actually need understanding, like answering questions or explaining career options."
+
+**"Can't AI just read the internet and tell?"**
+"It can, but that'd be slower, and I can't always trust which website it's pulling from. A fixed, checked dataset is faster and more reliable than the AI re-searching the same facts every time."
