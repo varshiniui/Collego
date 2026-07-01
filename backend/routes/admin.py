@@ -85,7 +85,7 @@ def add_college():
     result = supabase.table("colleges").insert({
         "name": data["name"],
         "category": data["category"],
-        "college_type": data.get("college_type", ""),
+        "ownership_type": data.get("college_type", ""),
         "location": data["location"],
         "state": data["state"],
         "courses_offered": data.get("courses_offered", ""),
@@ -148,7 +148,7 @@ def bulk_upload_colleges():
         record = {
             "name": name,
             "category": category,
-            "college_type": str(row.get("college_type", "") or ""),
+            "ownership_type": str(row.get("college_type", "") or ""),
             "location": location,
             "state": state,
             "courses_offered": str(row.get("courses_offered", "") or ""),
@@ -169,10 +169,15 @@ def bulk_upload_colleges():
     inserted = 0
     if to_insert:
         batch_size = 50
-        for i in range(0, len(to_insert), batch_size):
-            batch = to_insert[i:i + batch_size]
-            result = supabase.table("colleges").insert(batch).execute()
-            inserted += len(result.data or [])
+        try:
+            for i in range(0, len(to_insert), batch_size):
+                batch = to_insert[i:i + batch_size]
+                result = supabase.table("colleges").insert(batch).execute()
+                inserted += len(result.data or [])
+        except Exception as e:
+            return jsonify({
+                "error": f"Insert failed after {inserted} rows: {str(e)}"
+            }), 500
 
     return jsonify({
         "message": f"Inserted {inserted} colleges",
