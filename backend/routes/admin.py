@@ -120,10 +120,32 @@ def bulk_upload_colleges():
     if missing_cols:
         return jsonify({"error": f"CSV is missing required columns: {', '.join(missing_cols)}"}), 400
 
-    numeric_cols = ["min_cutoff_percentage", "fees_min", "fees_max", "ranking"]
+    numeric_cols = ["min_cutoff_percentage", "fees_min", "fees_max", "ranking", "typical_rank_cutoff"]
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    def clean_int(val):
+        try:
+            if val is None or pd.isna(val):
+                return None
+        except TypeError:
+            return None
+        try:
+            return int(val)
+        except (TypeError, ValueError):
+            return None
+
+    def clean_float(val):
+        try:
+            if val is None or pd.isna(val):
+                return None
+        except TypeError:
+            return None
+        try:
+            return float(val)
+        except (TypeError, ValueError):
+            return None
 
     existing = supabase.table("colleges").select("name").execute()
     existing_names = {r["name"].strip().lower() for r in (existing.data or [])}
