@@ -45,17 +45,23 @@ FLOAT_FIELDS = ["min_cutoff_percentage", "fees_min", "fees_max"]
 INT_FIELDS = ["ranking", "typical_rank_cutoff"]
 
 
+def to_float(val):
+    val = (val or "").strip()
+    return float(val) if val else None
+
+def to_int(val):
+    val = (val or "").strip()
+    return int(float(val)) if val else None
+
 def load_rows():
     with open(CSV_PATH, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         rows = list(reader)
     for row in rows:
         for field in FLOAT_FIELDS:
-            val = row.get(field, "").strip()
-            row[field] = float(val) if val else None
+            row[field] = to_float(row.get(field))
         for field in INT_FIELDS:
-            val = row.get(field, "").strip()
-            row[field] = int(float(val)) if val else None
+            row[field] = to_int(row.get(field))
         row["is_active"] = True
     return rows
 
