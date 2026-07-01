@@ -349,7 +349,7 @@ def search_colleges():
     if q.get("category"):
         query = query.eq("category", q["category"])
     if q.get("ownership_type"):
-        query = query.eq("college_type", q["ownership_type"])
+        query = query.eq("ownership_type", q["ownership_type"])
     if q.get("state"):
         query = query.ilike("location", f"%{q['state']}%")
     if q.get("course_category"):

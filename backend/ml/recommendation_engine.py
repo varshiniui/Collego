@@ -272,7 +272,7 @@ def calculate_college_score(profile: dict, college: dict) -> tuple[float, list, 
     # against `category`, which could never match, so this preference was
     # silently a no-op for every college.
     preferred_type = (profile.get("preferred_college_type") or "").lower()
-    actual_type = (college.get("college_type") or "").lower()
+    actual_type = (college.get("ownership_type") or "").lower()
 
     if not preferred_type or preferred_type == "no preference":
         type_score = 0.7  # student has no preference, so this shouldn't drag the score down
@@ -280,7 +280,7 @@ def calculate_college_score(profile: dict, college: dict) -> tuple[float, list, 
         type_score = 0.6  # unknown type — stay neutral rather than penalizing
     elif preferred_type == actual_type:
         type_score = 1.0
-        reasons.append(f"Matches your preferred college type ({college.get('college_type')})")
+        reasons.append(f"Matches your preferred college type ({college.get('ownership_type')})")
     else:
         type_score = 0.35
 
