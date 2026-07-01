@@ -63,6 +63,9 @@ def load_rows():
         for field in INT_FIELDS:
             row[field] = to_int(row.get(field))
         row["is_active"] = True
+
+        # CSV column is "college_type" but the DB column is "ownership_type"
+        row["ownership_type"] = row.pop("college_type", None)
     return rows
 
 
