@@ -1,250 +1,285 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
 
-/* Real Tamil Nadu colleges with real departments */
-const SAMPLE = [
-  { rank: 1,  name: "PSG College of Technology",          dept: "B.E. Computer Science",       cutoff: 196.5, match: true  },
-  { rank: 2,  name: "Coimbatore Institute of Technology", dept: "B.E. Computer Science",       cutoff: 193.0, match: true  },
-  { rank: 3,  name: "Government College of Technology",   dept: "B.Tech Information Technology",cutoff: 191.5, match: true  },
-  { rank: 4,  name: "Thiagarajar College of Engineering", dept: "B.E. Computer Science",       cutoff: 188.0, match: true  },
-  { rank: 5,  name: "Sri Sivasubramaniya Nadar College",  dept: "B.E. Computer Science",       cutoff: 184.5, match: false },
+/* ─── Mock recommendation data shown in the hero widget ─────────────────── */
+const MOCK_COLLEGES = [
+  { name: "PSG College of Technology", loc: "Coimbatore", score: 94, level: "Highly Recommended", dept: "CSE" },
+  { name: "Government College of Technology", loc: "Coimbatore", score: 88, level: "Recommended", dept: "IT" },
+  { name: "Thiagarajar College of Engineering", loc: "Madurai", score: 81, level: "Recommended", dept: "CSE" },
 ];
 
 export default function Landing() {
-  const [hoveredRow, setHoveredRow] = useState(null);
-
   return (
-    <div style={{ background: "#fafaf8", minHeight: "100vh", fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div style={{ background: "#F7F7F5", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
 
-      {/* ── Nav ── very minimal, just anchors the page */}
-      <nav style={{
-        padding: "28px 48px 0",
-        display: "flex", alignItems: "baseline", justifyContent: "space-between",
-        maxWidth: 1020, margin: "0 auto"
-      }}>
-        <span style={{
-          fontFamily: "'Sora', sans-serif", fontWeight: 800,
-          fontSize: 16, color: "#111", letterSpacing: "-0.3px"
-        }}>
+      {/* ── Nav ─────────────────────────────────────────────────────────── */}
+      <nav style={{ maxWidth: 1100, margin: "0 auto", padding: "20px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 18, color: "#15151A", letterSpacing: "-0.3px" }}>
           Collego
         </span>
-        <div style={{ display: "flex", gap: 28, alignItems: "baseline" }}>
-          <Link to="/login" style={{ fontSize: 13, color: "#888", textDecoration: "none", fontWeight: 450 }}
-            onMouseEnter={e => e.currentTarget.style.color = "#111"}
-            onMouseLeave={e => e.currentTarget.style.color = "#888"}>
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <Link to="/login" style={{ fontSize: 14, fontWeight: 500, color: "#7a7a80", textDecoration: "none" }}
+            onMouseEnter={e => e.currentTarget.style.color = "#15151A"}
+            onMouseLeave={e => e.currentTarget.style.color = "#7a7a80"}>
             Log in
           </Link>
-          <Link to="/register" style={{
-            fontSize: 13, color: "#111", textDecoration: "none",
-            fontWeight: 600, borderBottom: "1.5px solid #111", paddingBottom: 1
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = "#4e8a70"; e.currentTarget.style.borderColor = "#4e8a70"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = "#111"; e.currentTarget.style.borderColor = "#111"; }}>
+          <Link to="/register"
+            style={{ fontSize: 13, fontWeight: 600, padding: "9px 18px", borderRadius: 9, background: "#15151A", color: "#fff", textDecoration: "none", transition: "background .15s" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#2a2a30"}
+            onMouseLeave={e => e.currentTarget.style.background = "#15151A"}>
             Get started
           </Link>
         </div>
       </nav>
 
-      {/* ── Hero ── */}
-      <section style={{ maxWidth: 1020, margin: "0 auto", padding: "72px 48px 0" }}>
+      {/* ── Hero — split ─────────────────────────────────────────────────── */}
+      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 28px 80px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "center" }}>
 
-        {/* Headline — single weight, single color, let the size do the work */}
-        <h1 style={{
-          fontFamily: "'Sora', sans-serif",
-          fontSize: "clamp(2.6rem, 5vw, 3.8rem)",
-          fontWeight: 800,
-          lineHeight: 1.05,
-          letterSpacing: "-2px",
-          color: "#111",
-          margin: 0,
-          maxWidth: 600
-        }}>
-          Your rank list,<br />before the results.
-        </h1>
-
-        {/* Subhead — two lines, plain, direct */}
-        <p style={{
-          fontSize: 15, lineHeight: 1.65, color: "#666",
-          maxWidth: 420, marginTop: 20, marginBottom: 0
-        }}>
-          Enter your 12th marks. Collego calculates your TNEA cutoff and shows you
-          every college in Tamil Nadu you can realistically get into — sorted by match.
-        </p>
-
-        {/* CTA — text link style, not a button block */}
-        <div style={{ marginTop: 32, display: "flex", alignItems: "center", gap: 32 }}>
-          <Link to="/register" style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            fontSize: 14, fontWeight: 650, color: "#fff",
-            background: "#111", padding: "10px 20px", borderRadius: 7,
-            textDecoration: "none", letterSpacing: "-0.1px"
-          }}
-            onMouseEnter={e => e.currentTarget.style.background = "#333"}
-            onMouseLeave={e => e.currentTarget.style.background = "#111"}>
-            See my colleges
-            <ArrowUpRight size={14} strokeWidth={2.5} />
-          </Link>
-          <Link to="/login" style={{
-            fontSize: 13.5, color: "#999", textDecoration: "none"
-          }}
-            onMouseEnter={e => e.currentTarget.style.color = "#111"}
-            onMouseLeave={e => e.currentTarget.style.color = "#999"}>
-            Already have an account
-          </Link>
-        </div>
-      </section>
-
-      {/* ── The rank list — this IS the product, shown in the hero ── */}
-      <section style={{ maxWidth: 1020, margin: "48px auto 0", padding: "0 48px" }}>
-
-        {/* Table header — like a real rank list */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "36px 1fr 200px 90px 80px",
-          padding: "8px 16px",
-          borderTop: "1.5px solid #111",
-          borderBottom: "1px solid #e0e0dc"
-        }}>
-          {["#", "College / Department", "Location", "Cutoff", "Your match"].map(h => (
-            <span key={h} style={{
-              fontSize: 10.5, fontWeight: 700, letterSpacing: "0.07em",
-              textTransform: "uppercase", color: "#999"
-            }}>
-              {h}
-            </span>
-          ))}
-        </div>
-
-        {/* Rows */}
-        {SAMPLE.map((c, i) => (
-          <div
-            key={c.rank}
-            onMouseEnter={() => setHoveredRow(i)}
-            onMouseLeave={() => setHoveredRow(null)}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "36px 1fr 200px 90px 80px",
-              padding: "14px 16px",
-              borderBottom: "1px solid #e8e8e4",
-              background: hoveredRow === i ? "#f0f0ee" : "transparent",
-              transition: "background 0.12s",
-              cursor: "default",
-              alignItems: "center"
-            }}
-          >
-            <span style={{ fontSize: 12, color: "#bbb", fontVariantNumeric: "tabular-nums" }}>
-              {c.rank}
-            </span>
-            <div>
-              <p style={{
-                fontSize: 13.5, fontWeight: 600, color: "#111",
-                margin: 0, letterSpacing: "-0.1px"
-              }}>
-                {c.name}
-              </p>
-              <p style={{ fontSize: 11.5, color: "#999", margin: "2px 0 0" }}>
-                {c.dept}
-              </p>
-            </div>
-            <span style={{ fontSize: 12.5, color: "#555" }}>Tamil Nadu</span>
-            <span style={{
-              fontSize: 13, fontWeight: 600, color: "#111",
-              fontVariantNumeric: "tabular-nums"
-            }}>
-              {c.cutoff}
-            </span>
-            <span style={{
-              fontSize: 11.5, fontWeight: 700,
-              color: c.match ? "#3d7a5c" : "#c0392b",
-              background: c.match ? "#edf7f2" : "#fdf0ee",
-              padding: "3px 10px", borderRadius: 5,
-              display: "inline-block"
-            }}>
-              {c.match ? "Eligible" : "Below cutoff"}
-            </span>
+        {/* Left: copy */}
+        <div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12, fontWeight: 600, color: "#3B6553", background: "#EEF7F3", padding: "5px 12px", borderRadius: 99, marginBottom: 28 }}>
+            <Sparkles size={12} />
+            AI-powered · Tamil Nadu colleges
           </div>
-        ))}
 
-        {/* Blur overlay — implies there are more rows, drives sign-up */}
-        <div style={{ position: "relative" }}>
-          <div style={{
-            height: 80,
-            background: "linear-gradient(to bottom, transparent, #fafaf8 85%)",
-            position: "absolute", top: -40, left: 0, right: 0,
-            pointerEvents: "none"
-          }} />
-          <div style={{
-            padding: "24px 16px 0",
-            textAlign: "center"
+          <h1 style={{
+            fontFamily: "'Sora', sans-serif",
+            fontSize: "clamp(2rem, 3.8vw, 3rem)",
+            fontWeight: 800,
+            lineHeight: 1.08,
+            letterSpacing: "-1.2px",
+            color: "#15151A",
+            marginBottom: 22
           }}>
-            <p style={{ fontSize: 13, color: "#aaa", margin: "0 0 14px" }}>
-              +274 more colleges — based on your actual marks
-            </p>
-            <Link to="/register" style={{
-              fontSize: 13, fontWeight: 600, color: "#3d7a5c",
-              textDecoration: "none", borderBottom: "1.5px solid #3d7a5c",
-              paddingBottom: 1
-            }}
-              onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
-              onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-              Enter your marks to see your full list →
+            Find the college<br />
+            <span style={{ fontWeight: 400, color: "#7a7a80" }}>that actually fits</span>{" "}
+            <span style={{ color: "#5C9C81" }}>you.</span>
+          </h1>
+
+          <p style={{ fontSize: 15, lineHeight: 1.65, color: "#7a7a80", maxWidth: 400, marginBottom: 36 }}>
+            Enter your 12th marks once. Collego runs the TNEA cutoff formula against
+            279 colleges and shows you exactly where you stand — no guesswork, no paid listings.
+          </p>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <Link to="/register"
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, padding: "11px 22px", borderRadius: 10, background: "#5C9C81", color: "#fff", textDecoration: "none", transition: "background .15s" }}
+              onMouseEnter={e => e.currentTarget.style.background = "#4A8068"}
+              onMouseLeave={e => e.currentTarget.style.background = "#5C9C81"}>
+              Start for free <ArrowRight size={15} />
+            </Link>
+            <Link to="/login"
+              style={{ fontSize: 14, fontWeight: 500, color: "#7a7a80", textDecoration: "none", transition: "color .15s" }}
+              onMouseEnter={e => e.currentTarget.style.color = "#15151A"}
+              onMouseLeave={e => e.currentTarget.style.color = "#7a7a80"}>
+              I have an account →
             </Link>
           </div>
+
+          {/* Social proof strip */}
+          <div style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 40, paddingTop: 32, borderTop: "1px solid #e8e8e6" }}>
+            <Proof value="279" label="colleges indexed" />
+            <div style={{ width: 1, height: 32, background: "#e8e8e6" }} />
+            <Proof value="TNEA" label="formula accurate" />
+            <div style={{ width: 1, height: 32, background: "#e8e8e6" }} />
+            <Proof value="3 roles" label="student · counselor · admin" />
+          </div>
         </div>
+
+        {/* Right: live mock widget */}
+        <HeroWidget />
       </section>
 
-      {/* ── How it works — inline, not a separate band ── */}
-      <section style={{
-        maxWidth: 1020, margin: "0 auto",
-        padding: "80px 48px 0",
-        display: "grid", gridTemplateColumns: "200px 1fr",
-        gap: 64, alignItems: "start"
-      }}>
-        <div>
-          <p style={{
-            fontSize: 11, fontWeight: 700, letterSpacing: "0.1em",
-            textTransform: "uppercase", color: "#bbb", margin: 0
-          }}>
-            How it works
+      {/* ── How it works — actual steps, genuinely sequential ────────────── */}
+      <section style={{ background: "#15151A", padding: "72px 28px" }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#5C9C81", marginBottom: 40 }}>
+            How Collego works
           </p>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 40 }}>
-          {[
-            { title: "Enter your marks", body: "12th percentage and stream. Maths, Physics, Chemistry if you have them — Collego calculates TNEA cutoff." },
-            { title: "See your list", body: "Every eligible college ranked by match score. Fees, ranking, and cutoff shown side by side." },
-            { title: "Track with a counselor", body: "A real counselor reviews your documents and updates your status as applications move forward." },
-          ].map(({ title, body }) => (
-            <div key={title}>
-              <p style={{
-                fontSize: 13.5, fontWeight: 650, color: "#111",
-                marginBottom: 8, lineHeight: 1.3, letterSpacing: "-0.1px"
-              }}>
-                {title}
-              </p>
-              <p style={{ fontSize: 12.5, color: "#888", lineHeight: 1.65 }}>
-                {body}
-              </p>
-            </div>
-          ))}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
+            {[
+              { step: "01", title: "Enter your marks", body: "12th percentage, stream, and optional TNEA subject scores. Takes two minutes." },
+              { step: "02", title: "Get matched colleges", body: "The AI runs eligibility against every college's real cutoff. You see a ranked, scored list instantly." },
+              { step: "03", title: "Track with a counselor", body: "A human counselor verifies your documents and keeps your application moving through each status." },
+            ].map(({ step, title, body }, i) => (
+              <div key={step} style={{ padding: "0 36px 0 0", borderLeft: i > 0 ? "1px solid #2a2a30" : "none", paddingLeft: i > 0 ? 36 : 0 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "#5C9C81", display: "block", marginBottom: 14 }}>{step}</span>
+                <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 10, letterSpacing: "-0.2px" }}>{title}</h3>
+                <p style={{ fontSize: 13, lineHeight: 1.65, color: "#9b9b9f" }}>{body}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer style={{
-        maxWidth: 1020, margin: "80px auto 0",
-        padding: "24px 48px",
-        borderTop: "1px solid #e8e8e4",
-        display: "flex", justifyContent: "space-between", alignItems: "center"
-      }}>
-        <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 13, color: "#ccc" }}>
-          Collego
-        </span>
-        <span style={{ fontSize: 11.5, color: "#bbb" }}>
-          Built by Varshini for Tamil Nadu students · {new Date().getFullYear()}
-        </span>
-      </footer>
+      {/* ── Bottom CTA ───────────────────────────────────────────────────── */}
+      <section style={{ padding: "72px 28px", textAlign: "center" }}>
+        <div style={{ maxWidth: 520, margin: "0 auto" }}>
+          <h2 style={{ fontFamily: "'Sora', sans-serif", fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#15151A", letterSpacing: "-0.5px", marginBottom: 14 }}>
+            Your marks are ready.<br />Your list isn't.
+          </h2>
+          <p style={{ fontSize: 14, color: "#7a7a80", lineHeight: 1.65, marginBottom: 32 }}>
+            Create a free account and get your personalised college list in under five minutes.
+          </p>
+          <Link to="/register"
+            style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, padding: "12px 28px", borderRadius: 10, background: "#15151A", color: "#fff", textDecoration: "none" }}
+            onMouseEnter={e => e.currentTarget.style.background = "#2a2a30"}
+            onMouseLeave={e => e.currentTarget.style.background = "#15151A"}>
+            Get my college list <ArrowRight size={15} />
+          </Link>
+        </div>
+      </section>
 
+      <footer style={{ borderTop: "1px solid #e8e8e6", padding: "20px 28px", textAlign: "center", fontSize: 12, color: "#9b9b9f" }}>
+        Built by Varshini · Collego · {new Date().getFullYear()}
+      </footer>
+    </div>
+  );
+}
+
+/* ── Live recommendation widget ─────────────────────────────────────────── */
+function HeroWidget() {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [counting, setCounting] = useState(false);
+  const [displayScore, setDisplayScore] = useState(0);
+
+  // Cycle through colleges every 2.8s
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActiveIdx(prev => (prev + 1) % MOCK_COLLEGES.length);
+    }, 2800);
+    return () => clearInterval(id);
+  }, []);
+
+  // Animate score counter whenever college changes
+  useEffect(() => {
+    const target = MOCK_COLLEGES[activeIdx].score;
+    setDisplayScore(0);
+    setCounting(true);
+    let start = null;
+    const duration = 600;
+    const tick = (ts) => {
+      if (!start) start = ts;
+      const pct = Math.min((ts - start) / duration, 1);
+      setDisplayScore(Math.round(pct * target));
+      if (pct < 1) requestAnimationFrame(tick);
+      else setCounting(false);
+    };
+    requestAnimationFrame(tick);
+  }, [activeIdx]);
+
+  const college = MOCK_COLLEGES[activeIdx];
+
+  return (
+    <div style={{
+      background: "#15151A",
+      borderRadius: 18,
+      padding: "28px 24px",
+      position: "relative",
+      overflow: "hidden",
+      boxShadow: "0 24px 60px rgba(21,21,26,0.18)"
+    }}>
+      {/* Subtle glow */}
+      <div style={{
+        position: "absolute", top: -60, right: -60,
+        width: 200, height: 200, borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(92,156,129,0.18) 0%, transparent 70%)",
+        pointerEvents: "none"
+      }} />
+
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+        <div>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#5C9C81", marginBottom: 4 }}>
+            Your match
+          </p>
+          <p style={{ fontSize: 12, color: "#5a5a60" }}>Based on 90.4% · PCM+CS stream</p>
+        </div>
+        <div style={{
+          width: 52, height: 52, borderRadius: "50%",
+          border: "2.5px solid #5C9C81",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          flexDirection: "column"
+        }}>
+          <span style={{ fontSize: 17, fontWeight: 800, color: "#fff", lineHeight: 1, fontFamily: "'Sora', sans-serif" }}>{displayScore}</span>
+          <span style={{ fontSize: 9, color: "#5C9C81", fontWeight: 600 }}>/ 100</span>
+        </div>
+      </div>
+
+      {/* College cards */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {MOCK_COLLEGES.map((c, i) => (
+          <div key={c.name}
+            style={{
+              padding: "14px 16px",
+              borderRadius: 12,
+              background: i === activeIdx ? "rgba(92,156,129,0.12)" : "rgba(255,255,255,0.04)",
+              border: i === activeIdx ? "1px solid rgba(92,156,129,0.3)" : "1px solid rgba(255,255,255,0.06)",
+              transition: "all 0.35s ease",
+              cursor: "default"
+            }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{
+                  fontSize: 13, fontWeight: 600, color: i === activeIdx ? "#fff" : "#6a6a70",
+                  marginBottom: 3, transition: "color 0.35s",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+                }}>
+                  {c.name}
+                </p>
+                <p style={{ fontSize: 11, color: "#5a5a60" }}>{c.dept} · {c.loc}</p>
+              </div>
+              <span style={{
+                fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 99, flexShrink: 0, marginLeft: 10,
+                background: c.level === "Highly Recommended" ? "rgba(92,156,129,0.2)" : "rgba(255,255,255,0.07)",
+                color: c.level === "Highly Recommended" ? "#5C9C81" : "#5a5a60",
+                border: c.level === "Highly Recommended" ? "1px solid rgba(92,156,129,0.3)" : "1px solid rgba(255,255,255,0.08)"
+              }}>
+                {c.level === "Highly Recommended" ? "★ Top match" : "Recommended"}
+              </span>
+            </div>
+            {i === activeIdx && (
+              <div style={{ marginTop: 10 }}>
+                <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 99, overflow: "hidden" }}>
+                  <div style={{
+                    height: "100%", borderRadius: 99, background: "#5C9C81",
+                    width: `${c.score}%`, transition: "width 0.6s ease"
+                  }} />
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Counselor note */}
+      <div style={{ marginTop: 16, padding: "10px 14px", background: "rgba(255,255,255,0.04)", borderRadius: 10, display: "flex", alignItems: "flex-start", gap: 10 }}>
+        <CheckCircle2 size={14} style={{ color: "#5C9C81", flexShrink: 0, marginTop: 1 }} />
+        <p style={{ fontSize: 11, color: "#5a5a60", lineHeight: 1.5 }}>
+          Documents verified · Counselor assigned
+        </p>
+      </div>
+
+      {/* Pagination dots */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 18 }}>
+        {MOCK_COLLEGES.map((_, i) => (
+          <div key={i} style={{
+            width: i === activeIdx ? 18 : 5, height: 5, borderRadius: 99,
+            background: i === activeIdx ? "#5C9C81" : "#2a2a30",
+            transition: "all 0.3s ease"
+          }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Proof({ value, label }) {
+  return (
+    <div>
+      <p style={{ fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 800, color: "#15151A", lineHeight: 1 }}>{value}</p>
+      <p style={{ fontSize: 11, color: "#9b9b9f", marginTop: 3 }}>{label}</p>
     </div>
   );
 }
