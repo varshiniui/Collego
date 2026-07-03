@@ -1,15 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { useAuth } from "../../hooks/useAuth";
 import api from "../../lib/api";
-import {
-  Users, GraduationCap, FileCheck, Award, ShieldCheck,
-  TrendingUp, ArrowRight, Activity
-} from "lucide-react";
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const firstName = user?.name?.split(" ")[0];
 
   useEffect(() => {
     api.get("/admin/dashboard")
@@ -19,66 +18,64 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <h1 className="font-display text-2xl font-bold text-ink mb-1">Platform Overview</h1>
-      <p className="text-sm text-ink-soft mb-8">Live metrics across students, counselors, and admissions.</p>
+      {/* Header */}
+      <div className="mb-9">
+        <p className="text-sm font-medium mb-1" style={{ color: "#5C9C81" }}>
+          {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}
+        </p>
+        <h1 className="font-display text-3xl font-extrabold tracking-tight" style={{ color: "#15151A" }}>
+          Good {hour()}, {firstName}.
+        </h1>
+        <p className="text-sm mt-1" style={{ color: "#7a7a80" }}>Here's what's happening on the platform.</p>
+      </div>
 
+      {/* Stat strip — no icon boxes, just numbers with left-border accent */}
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-4 gap-3 mb-10">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-24 bg-white rounded-card animate-pulse" style={{ boxShadow: "inset 0 0 0 1.5px #E3E3E0" }} />
+            <div key={i} className="h-20 rounded-xl animate-pulse" style={{ background: "#ebebea" }} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <StatCard icon={<Users size={16} />} label="Total Students" value={stats?.total_students ?? 0} />
-          <StatCard icon={<ShieldCheck size={16} />} label="Counselors" value={stats?.total_counselors ?? 0} accent="blue" />
-          <StatCard icon={<GraduationCap size={16} />} label="Colleges" value={stats?.total_colleges ?? 0} />
-          <StatCard icon={<FileCheck size={16} />} label="Applications" value={stats?.total_applications ?? 0} />
-          <StatCard icon={<Award size={16} />} label="Admission Success" value={`${stats?.admission_success_rate ?? 0}%`} accent="green" />
-          <StatCard icon={<Activity size={16} />} label="AI Recommendations" value={stats?.total_recommendations ?? 0} />
-          <StatCard icon={<TrendingUp size={16} />} label="Active Counselings" value={stats?.active_counselings ?? 0} />
-          <StatCard icon={<Users size={16} />} label="Unassigned Students" value={stats?.unassigned_students ?? 0} />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+          <Stat label="Students"         value={stats?.total_students ?? 0}        accent="#5C9C81" />
+          <Stat label="Counselors"       value={stats?.total_counselors ?? 0}       accent="#3D6BFF" />
+          <Stat label="Colleges"         value={stats?.total_colleges ?? 0}         accent="#15151A" />
+          <Stat label="Applications"     value={stats?.total_applications ?? 0}     accent="#5C9C81" />
+          <Stat label="Success rate"     value={`${stats?.admission_success_rate ?? 0}%`} accent="#2BA84A" />
+          <Stat label="AI matched"       value={stats?.total_recommendations ?? 0}  accent="#3D6BFF" />
+          <Stat label="Active counselings" value={stats?.active_counselings ?? 0}   accent="#5C9C81" />
+          <Stat label="Unassigned"       value={stats?.unassigned_students ?? 0}    accent="#e05252" />
         </div>
       )}
 
-      {/* Charts row */}
-      {!loading && stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <ChartCard
-            title="College Distribution"
-            subtitle="By category"
-            data={stats.college_distribution || []}
-            color="#6366f1"
-          />
-          <ChartCard
-            title="Course Popularity"
-            subtitle="By student interest"
-            data={stats.course_popularity || []}
-            color="#0ea5e9"
-          />
-        </div>
-      )}
-
-      <h2 className="font-display font-bold text-ink/90 mb-3">Quick actions</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* Actions — two-column list, not cards */}
+      <div className="mb-2 pb-2" style={{ borderBottom: "1px solid #e8e8e6" }}>
+        <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#9b9b9f" }}>
+          Quick actions
+        </span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-px mt-0" style={{ background: "#e8e8e6" }}>
         {[
-          { to: "/admin/students",    label: "Manage Students",         desc: "View, assign counselors, toggle accounts" },
-          { to: "/admin/counselors",  label: "Manage Counselors",       desc: "Add, review and deactivate counselors" },
-          { to: "/admin/colleges",    label: "College Database",        desc: "Bulk upload or edit college records" },
-          { to: "/admin/analytics",   label: "Reports & Analytics",     desc: "Admission trends, AI accuracy, cohort stats" },
-          { to: "/admin/ai-settings", label: "AI Recommendation Rules", desc: "Tune weights and cutoffs for the AI engine" },
-          { to: "/admin/settings",    label: "Platform Configuration",  desc: "Admission criteria, status flows, categories" },
+          { to: "/admin/students",     label: "Students",            desc: "Accounts · assignments" },
+          { to: "/admin/counselors",   label: "Counselors",          desc: "Access · student load" },
+          { to: "/admin/colleges",     label: "Colleges",            desc: "Database · bulk CSV upload" },
+          { to: "/admin/analytics",    label: "Reports",             desc: "Trends · downloadable CSVs" },
+          { to: "/admin/ai-settings",  label: "AI Settings",         desc: "Scoring weights · thresholds" },
+          { to: "/admin/settings",     label: "Platform config",     desc: "Criteria · categories" },
         ].map(({ to, label, desc }) => (
           <Link
             key={to} to={to}
-            className="press-scale flex items-start justify-between gap-3 bg-white rounded-xl px-5 py-4 hover:bg-primary-50/30 transition group"
-            style={{ boxShadow: "inset 0 0 0 1.5px #E3E3E0" }}
+            className="group flex items-center justify-between px-5 py-4 transition-colors"
+            style={{ background: "#fff" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#F7F7F5"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "#fff"; }}
           >
             <div>
-              <p className="text-sm font-semibold text-ink/90 group-hover:text-primary-700 transition">{label}</p>
-              <p className="text-xs text-ink-muted mt-0.5">{desc}</p>
+              <p className="text-sm font-semibold" style={{ color: "#15151A" }}>{label}</p>
+              <p className="text-xs mt-0.5" style={{ color: "#9b9b9f" }}>{desc}</p>
             </div>
-            <ArrowRight size={15} className="text-ink-muted/60 group-hover:text-primary-500 mt-0.5 shrink-0 transition" />
+            <span className="text-lg font-light transition-transform group-hover:translate-x-0.5" style={{ color: "#d4d4d1" }}>→</span>
           </Link>
         ))}
       </div>
@@ -86,85 +83,26 @@ export default function AdminDashboard() {
   );
 }
 
-// ─── Horizontal bar chart (no external library) ───────────────────────────────
-
-function ChartCard({ title, subtitle, data, color }) {
-  if (!data.length) {
-    return (
-      <div
-        className="bg-white rounded-card p-5"
-        style={{ boxShadow: "inset 0 0 0 1.5px #E3E3E0" }}
-      >
-        <p className="text-sm font-semibold text-ink/90 mb-0.5">{title}</p>
-        <p className="text-xs text-ink-muted mb-4">{subtitle}</p>
-        <p className="text-xs text-ink-muted text-center py-6">No data yet</p>
-      </div>
-    );
-  }
-
-  const max = Math.max(...data.map(d => d.count));
-
+function Stat({ label, value, accent }) {
   return (
     <div
-      className="bg-white rounded-card p-5"
-      style={{ boxShadow: "inset 0 0 0 1.5px #E3E3E0" }}
+      className="rounded-xl px-4 py-4"
+      style={{ background: "#fff", borderLeft: `3px solid ${accent}` }}
     >
-      <p className="text-sm font-semibold text-ink/90 mb-0.5">{title}</p>
-      <p className="text-xs text-ink-muted mb-4">{subtitle}</p>
-      <div className="space-y-2.5">
-        {data.map((d, i) => (
-          <div key={i}>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-ink-soft truncate max-w-[70%]">{d.label}</span>
-              <span className="text-xs font-semibold text-ink/80 ml-2 shrink-0">{d.count}</span>
-            </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: max > 0 ? `${Math.round((d.count / max) * 100)}%` : "0%",
-                  backgroundColor: color,
-                  opacity: 1 - i * 0.08,
-                }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+      <p
+        className="font-display text-2xl font-extrabold tracking-tight leading-none mb-1"
+        style={{ color: "#15151A" }}
+      >
+        {value}
+      </p>
+      <p className="text-xs" style={{ color: "#9b9b9f" }}>{label}</p>
     </div>
   );
 }
 
-// ─── Stat card (unchanged from your original) ─────────────────────────────────
-
-function StatCard({ icon, label, value, accent }) {
-  const accentBg = accent === "blue"  ? "bg-accentBlue-50 text-accentBlue-600"
-    : accent === "green" ? "bg-accentGreen-50 text-accentGreen-600"
-    : "bg-paper text-ink-soft";
-
-  const handleMove = (e) => {
-    const card = e.currentTarget;
-    const r = card.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    card.style.transform = `perspective(500px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg) translateY(-2px)`;
-  };
-  const handleLeave = (e) => {
-    e.currentTarget.style.transform = "perspective(500px) rotateX(0) rotateY(0) translateY(0)";
-  };
-
-  return (
-    <div
-      className="tilt-card rounded-card p-4"
-      style={{ "--tilt-border": "#E3E3E0" }}
-      onMouseMove={handleMove}
-      onMouseLeave={handleLeave}
-    >
-      <div className={`w-7 h-7 rounded-md flex items-center justify-center mb-3 ${accentBg}`}>
-        {icon}
-      </div>
-      <p className="text-2xl font-bold font-display text-ink">{value}</p>
-      <p className="text-xs text-ink-muted mt-0.5">{label}</p>
-    </div>
-  );
+function hour() {
+  const h = new Date().getHours();
+  if (h < 12) return "morning";
+  if (h < 17) return "afternoon";
+  return "evening";
 }

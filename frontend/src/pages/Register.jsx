@@ -5,9 +5,9 @@ import toast from "react-hot-toast";
 import { ArrowRight, GraduationCap, Users, ShieldCheck } from "lucide-react";
 
 const ROLES = [
-  { value: "student", label: "Student", desc: "Get college recommendations", icon: GraduationCap },
-  { value: "counselor", label: "Counselor", desc: "Guide students", icon: Users },
-  { value: "admin", label: "Admin", desc: "Manage the platform", icon: ShieldCheck },
+  { value: "student",   label: "Student",   desc: "Get AI college matches",  icon: GraduationCap },
+  { value: "counselor", label: "Counselor", desc: "Guide students",          icon: Users },
+  { value: "admin",     label: "Admin",     desc: "Manage the platform",     icon: ShieldCheck },
 ];
 
 export default function Register() {
@@ -31,72 +31,122 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-paper flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-sm animate-fadeUp">
-        <Link to="/" className="font-display text-xl font-extrabold text-ink mb-8 block text-center">
+    <div className="min-h-screen flex" style={{ background: "#F7F7F5" }}>
+      {/* Left panel */}
+      <div
+        className="hidden md:flex flex-col justify-between w-[42%] shrink-0 px-12 py-10"
+        style={{ background: "#15151A" }}
+      >
+        <Link to="/" className="font-display text-xl font-extrabold text-white tracking-tight">
           Collego
         </Link>
-        <div className="tilt-card rounded-cardLg p-8" style={{ "--tilt-border": "#E3E3E0" }}>
-          <h1 className="font-display text-2xl font-bold text-ink mb-1">Create your account</h1>
-          <p className="text-sm text-ink-soft mb-6">Start finding colleges that fit you</p>
+        <div>
+          <p className="font-display text-3xl font-extrabold text-white leading-snug mb-4 tracking-tight">
+            Find the college<br />that fits your<br />actual marks.
+          </p>
+          <p className="text-sm leading-relaxed" style={{ color: "#9b9b9f" }}>
+            TNEA-formula cutoffs, real fees, real rankings — not a sponsored list.
+          </p>
+        </div>
+        <p className="text-xs" style={{ color: "#5a5a60" }}>© {new Date().getFullYear()} Collego</p>
+      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Right panel */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm">
+          <Link to="/" className="font-display text-xl font-extrabold md:hidden block mb-8" style={{ color: "#15151A" }}>
+            Collego
+          </Link>
+
+          <h1 className="font-display text-2xl font-extrabold mb-1 tracking-tight" style={{ color: "#15151A" }}>
+            Create account
+          </h1>
+          <p className="text-sm mb-8" style={{ color: "#7a7a80" }}>
+            Already registered? <Link to="/login" className="font-semibold" style={{ color: "#5C9C81" }}>Log in</Link>
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Role selector */}
             <div>
-              <label className="text-sm font-medium text-ink/80 block mb-1.5">I am a</label>
-              <div className="grid grid-cols-3 gap-2">
-                {ROLES.map(({ value, label, icon: Icon }) => (
+              <label className="block text-xs font-semibold mb-2 tracking-wide uppercase" style={{ color: "#9b9b9f" }}>
+                I am a
+              </label>
+              <div className="flex gap-2">
+                {ROLES.map(({ value, label, desc, icon: Icon }) => (
                   <button
                     type="button" key={value}
                     onClick={() => setForm({ ...form, role: value })}
-                    className={`press-scale flex flex-col items-center gap-1.5 py-3 rounded-xl border-1.5 text-xs font-medium transition ${
+                    className="flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg text-xs font-medium transition"
+                    style={
                       form.role === value
-                        ? "border-primary-500 bg-primary-50 text-primary-700"
-                        : "border-hairline text-ink-soft hover:border-ink/20"
-                    }`}
+                        ? { background: "#EEF7F3", border: "1.5px solid #5C9C81", color: "#3B6553" }
+                        : { background: "#fff", border: "1.5px solid #e8e8e6", color: "#7a7a80" }
+                    }
                   >
-                    <Icon size={18} />
+                    <Icon size={16} />
                     {label}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-ink/80 block mb-1.5">Full name</label>
+            <Field label="Full name">
               <input
-                required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border-1.5 border-hairline text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
-                placeholder="Your full name"
+                required value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })}
+                placeholder="Your name"
+                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition"
+                style={{ border: "1.5px solid #e8e8e6", background: "#fff", color: "#15151A" }}
+                onFocus={e => e.target.style.borderColor = "#5C9C81"}
+                onBlur={e => e.target.style.borderColor = "#e8e8e6"}
               />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-ink/80 block mb-1.5">Email</label>
+            </Field>
+
+            <Field label="Email">
               <input
-                type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border-1.5 border-hairline text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                type="email" required value={form.email}
+                onChange={e => setForm({ ...form, email: e.target.value })}
                 placeholder="you@example.com"
+                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition"
+                style={{ border: "1.5px solid #e8e8e6", background: "#fff", color: "#15151A" }}
+                onFocus={e => e.target.style.borderColor = "#5C9C81"}
+                onBlur={e => e.target.style.borderColor = "#e8e8e6"}
               />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-ink/80 block mb-1.5">Password</label>
+            </Field>
+
+            <Field label="Password">
               <input
-                type="password" required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-xl border-1.5 border-hairline text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                type="password" required minLength={6} value={form.password}
+                onChange={e => setForm({ ...form, password: e.target.value })}
                 placeholder="At least 6 characters"
+                className="w-full px-3.5 py-2.5 rounded-lg text-sm outline-none transition"
+                style={{ border: "1.5px solid #e8e8e6", background: "#fff", color: "#15151A" }}
+                onFocus={e => e.target.style.borderColor = "#5C9C81"}
+                onBlur={e => e.target.style.borderColor = "#e8e8e6"}
               />
-            </div>
+            </Field>
+
             <button
               type="submit" disabled={loading}
-              className="press-scale w-full bg-primary-500 text-white font-semibold py-2.5 rounded-xl hover:bg-primary-600 transition disabled:opacity-60 flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 transition"
+              style={{ background: loading ? "#9b9b9f" : "#15151A", color: "#fff" }}
             >
-              {loading ? "Creating account..." : <>Create account <ArrowRight size={16} /></>}
+              {loading ? "Creating…" : <><span>Create account</span> <ArrowRight size={15} /></>}
             </button>
           </form>
         </div>
-        <p className="text-center text-sm text-ink-soft mt-6">
-          Already have an account? <Link to="/login" className="text-primary-600 font-semibold">Log in</Link>
-        </p>
       </div>
+    </div>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold mb-1.5 tracking-wide uppercase" style={{ color: "#9b9b9f" }}>
+        {label}
+      </label>
+      {children}
     </div>
   );
 }
