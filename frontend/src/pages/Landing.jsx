@@ -1,285 +1,427 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
-import { ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
-/* ─── Mock recommendation data shown in the hero widget ─────────────────── */
-const MOCK_COLLEGES = [
-  { name: "PSG College of Technology", loc: "Coimbatore", score: 94, level: "Highly Recommended", dept: "CSE" },
-  { name: "Government College of Technology", loc: "Coimbatore", score: 88, level: "Recommended", dept: "IT" },
-  { name: "Thiagarajar College of Engineering", loc: "Madurai", score: 81, level: "Recommended", dept: "CSE" },
+const MOCK = [
+  { name: "PSG College of Technology",          dept: "B.E. Computer Science",        score: 94, top: true  },
+  { name: "Government College of Technology",   dept: "B.Tech Information Technology", score: 88, top: false },
+  { name: "Thiagarajar College of Engineering", dept: "B.E. Computer Science",        score: 81, top: false },
 ];
 
 export default function Landing() {
-  return (
-    <div style={{ background: "#F7F7F5", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
-
-      {/* ── Nav ─────────────────────────────────────────────────────────── */}
-      <nav style={{ maxWidth: 1100, margin: "0 auto", padding: "20px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 18, color: "#15151A", letterSpacing: "-0.3px" }}>
-          Collego
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <Link to="/login" style={{ fontSize: 14, fontWeight: 500, color: "#7a7a80", textDecoration: "none" }}
-            onMouseEnter={e => e.currentTarget.style.color = "#15151A"}
-            onMouseLeave={e => e.currentTarget.style.color = "#7a7a80"}>
-            Log in
-          </Link>
-          <Link to="/register"
-            style={{ fontSize: 13, fontWeight: 600, padding: "9px 18px", borderRadius: 9, background: "#15151A", color: "#fff", textDecoration: "none", transition: "background .15s" }}
-            onMouseEnter={e => e.currentTarget.style.background = "#2a2a30"}
-            onMouseLeave={e => e.currentTarget.style.background = "#15151A"}>
-            Get started
-          </Link>
-        </div>
-      </nav>
-
-      {/* ── Hero — split ─────────────────────────────────────────────────── */}
-      <section style={{ maxWidth: 1100, margin: "0 auto", padding: "40px 28px 80px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "center" }}>
-
-        {/* Left: copy */}
-        <div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12, fontWeight: 600, color: "#3B6553", background: "#EEF7F3", padding: "5px 12px", borderRadius: 99, marginBottom: 28 }}>
-            <Sparkles size={12} />
-            AI-powered · Tamil Nadu colleges
-          </div>
-
-          <h1 style={{
-            fontFamily: "'Sora', sans-serif",
-            fontSize: "clamp(2rem, 3.8vw, 3rem)",
-            fontWeight: 800,
-            lineHeight: 1.08,
-            letterSpacing: "-1.2px",
-            color: "#15151A",
-            marginBottom: 22
-          }}>
-            Find the college<br />
-            <span style={{ fontWeight: 400, color: "#7a7a80" }}>that actually fits</span>{" "}
-            <span style={{ color: "#5C9C81" }}>you.</span>
-          </h1>
-
-          <p style={{ fontSize: 15, lineHeight: 1.65, color: "#7a7a80", maxWidth: 400, marginBottom: 36 }}>
-            Enter your 12th marks once. Collego runs the TNEA cutoff formula against
-            279 colleges and shows you exactly where you stand — no guesswork, no paid listings.
-          </p>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <Link to="/register"
-              style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, padding: "11px 22px", borderRadius: 10, background: "#5C9C81", color: "#fff", textDecoration: "none", transition: "background .15s" }}
-              onMouseEnter={e => e.currentTarget.style.background = "#4A8068"}
-              onMouseLeave={e => e.currentTarget.style.background = "#5C9C81"}>
-              Start for free <ArrowRight size={15} />
-            </Link>
-            <Link to="/login"
-              style={{ fontSize: 14, fontWeight: 500, color: "#7a7a80", textDecoration: "none", transition: "color .15s" }}
-              onMouseEnter={e => e.currentTarget.style.color = "#15151A"}
-              onMouseLeave={e => e.currentTarget.style.color = "#7a7a80"}>
-              I have an account →
-            </Link>
-          </div>
-
-          {/* Social proof strip */}
-          <div style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 40, paddingTop: 32, borderTop: "1px solid #e8e8e6" }}>
-            <Proof value="279" label="colleges indexed" />
-            <div style={{ width: 1, height: 32, background: "#e8e8e6" }} />
-            <Proof value="TNEA" label="formula accurate" />
-            <div style={{ width: 1, height: 32, background: "#e8e8e6" }} />
-            <Proof value="3 roles" label="student · counselor · admin" />
-          </div>
-        </div>
-
-        {/* Right: live mock widget */}
-        <HeroWidget />
-      </section>
-
-      {/* ── How it works — actual steps, genuinely sequential ────────────── */}
-      <section style={{ background: "#15151A", padding: "72px 28px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#5C9C81", marginBottom: 40 }}>
-            How Collego works
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0 }}>
-            {[
-              { step: "01", title: "Enter your marks", body: "12th percentage, stream, and optional TNEA subject scores. Takes two minutes." },
-              { step: "02", title: "Get matched colleges", body: "The AI runs eligibility against every college's real cutoff. You see a ranked, scored list instantly." },
-              { step: "03", title: "Track with a counselor", body: "A human counselor verifies your documents and keeps your application moving through each status." },
-            ].map(({ step, title, body }, i) => (
-              <div key={step} style={{ padding: "0 36px 0 0", borderLeft: i > 0 ? "1px solid #2a2a30" : "none", paddingLeft: i > 0 ? 36 : 0 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "#5C9C81", display: "block", marginBottom: 14 }}>{step}</span>
-                <h3 style={{ fontFamily: "'Sora', sans-serif", fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 10, letterSpacing: "-0.2px" }}>{title}</h3>
-                <p style={{ fontSize: 13, lineHeight: 1.65, color: "#9b9b9f" }}>{body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Bottom CTA ───────────────────────────────────────────────────── */}
-      <section style={{ padding: "72px 28px", textAlign: "center" }}>
-        <div style={{ maxWidth: 520, margin: "0 auto" }}>
-          <h2 style={{ fontFamily: "'Sora', sans-serif", fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 800, color: "#15151A", letterSpacing: "-0.5px", marginBottom: 14 }}>
-            Your marks are ready.<br />Your list isn't.
-          </h2>
-          <p style={{ fontSize: 14, color: "#7a7a80", lineHeight: 1.65, marginBottom: 32 }}>
-            Create a free account and get your personalised college list in under five minutes.
-          </p>
-          <Link to="/register"
-            style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, padding: "12px 28px", borderRadius: 10, background: "#15151A", color: "#fff", textDecoration: "none" }}
-            onMouseEnter={e => e.currentTarget.style.background = "#2a2a30"}
-            onMouseLeave={e => e.currentTarget.style.background = "#15151A"}>
-            Get my college list <ArrowRight size={15} />
-          </Link>
-        </div>
-      </section>
-
-      <footer style={{ borderTop: "1px solid #e8e8e6", padding: "20px 28px", textAlign: "center", fontSize: 12, color: "#9b9b9f" }}>
-        Built by Varshini · Collego · {new Date().getFullYear()}
-      </footer>
-    </div>
-  );
-}
-
-/* ── Live recommendation widget ─────────────────────────────────────────── */
-function HeroWidget() {
   const [activeIdx, setActiveIdx] = useState(0);
-  const [counting, setCounting] = useState(false);
-  const [displayScore, setDisplayScore] = useState(0);
+  const [displayScore, setDisplayScore] = useState(MOCK[0].score);
 
-  // Cycle through colleges every 2.8s
   useEffect(() => {
-    const id = setInterval(() => {
-      setActiveIdx(prev => (prev + 1) % MOCK_COLLEGES.length);
-    }, 2800);
+    const id = setInterval(() => setActiveIdx(p => (p + 1) % MOCK.length), 3000);
     return () => clearInterval(id);
   }, []);
 
-  // Animate score counter whenever college changes
   useEffect(() => {
-    const target = MOCK_COLLEGES[activeIdx].score;
-    setDisplayScore(0);
-    setCounting(true);
-    let start = null;
-    const duration = 600;
-    const tick = (ts) => {
+    const target = MOCK[activeIdx].score;
+    let frame, start = null;
+    const tick = ts => {
       if (!start) start = ts;
-      const pct = Math.min((ts - start) / duration, 1);
-      setDisplayScore(Math.round(pct * target));
-      if (pct < 1) requestAnimationFrame(tick);
-      else setCounting(false);
+      const eased = 1 - Math.pow(1 - Math.min((ts - start) / 520, 1), 3);
+      setDisplayScore(Math.round(eased * target));
+      if (eased < 1) frame = requestAnimationFrame(tick);
     };
-    requestAnimationFrame(tick);
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
   }, [activeIdx]);
 
-  const college = MOCK_COLLEGES[activeIdx];
-
   return (
-    <div style={{
-      background: "#15151A",
-      borderRadius: 18,
-      padding: "28px 24px",
-      position: "relative",
-      overflow: "hidden",
-      boxShadow: "0 24px 60px rgba(21,21,26,0.18)"
-    }}>
-      {/* Subtle glow */}
-      <div style={{
-        position: "absolute", top: -60, right: -60,
-        width: 200, height: 200, borderRadius: "50%",
-        background: "radial-gradient(circle, rgba(92,156,129,0.18) 0%, transparent 70%)",
-        pointerEvents: "none"
-      }} />
+    <>
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; }
 
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
-        <div>
-          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#5C9C81", marginBottom: 4 }}>
-            Your match
-          </p>
-          <p style={{ fontSize: 12, color: "#5a5a60" }}>Based on 90.4% · PCM+CS stream</p>
-        </div>
-        <div style={{
-          width: 52, height: 52, borderRadius: "50%",
-          border: "2.5px solid #5C9C81",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexDirection: "column"
-        }}>
-          <span style={{ fontSize: 17, fontWeight: 800, color: "#fff", lineHeight: 1, fontFamily: "'Sora', sans-serif" }}>{displayScore}</span>
-          <span style={{ fontSize: 9, color: "#5C9C81", fontWeight: 600 }}>/ 100</span>
-        </div>
-      </div>
+        .landing { background: #f5f4f0; min-height: 100vh; font-family: 'Inter', system-ui, sans-serif; }
 
-      {/* College cards */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {MOCK_COLLEGES.map((c, i) => (
-          <div key={c.name}
-            style={{
-              padding: "14px 16px",
-              borderRadius: 12,
-              background: i === activeIdx ? "rgba(92,156,129,0.12)" : "rgba(255,255,255,0.04)",
-              border: i === activeIdx ? "1px solid rgba(92,156,129,0.3)" : "1px solid rgba(255,255,255,0.06)",
-              transition: "all 0.35s ease",
-              cursor: "default"
-            }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{
-                  fontSize: 13, fontWeight: 600, color: i === activeIdx ? "#fff" : "#6a6a70",
-                  marginBottom: 3, transition: "color 0.35s",
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
-                }}>
-                  {c.name}
-                </p>
-                <p style={{ fontSize: 11, color: "#5a5a60" }}>{c.dept} · {c.loc}</p>
-              </div>
-              <span style={{
-                fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 99, flexShrink: 0, marginLeft: 10,
-                background: c.level === "Highly Recommended" ? "rgba(92,156,129,0.2)" : "rgba(255,255,255,0.07)",
-                color: c.level === "Highly Recommended" ? "#5C9C81" : "#5a5a60",
-                border: c.level === "Highly Recommended" ? "1px solid rgba(92,156,129,0.3)" : "1px solid rgba(255,255,255,0.08)"
-              }}>
-                {c.level === "Highly Recommended" ? "★ Top match" : "Recommended"}
-              </span>
+        /* ── Nav ── */
+        .l-nav {
+          max-width: 1080px; margin: 0 auto;
+          padding: 22px 28px;
+          display: flex; align-items: center; justify-content: space-between;
+        }
+        .l-logo { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 16px; color: #111; letter-spacing: -0.3px; text-decoration: none; }
+        .l-nav-links { display: flex; gap: 20px; align-items: center; }
+        .l-login { font-size: 13px; color: #888; text-decoration: none; font-weight: 500; }
+        .l-login:hover { color: #111; }
+        .l-signup {
+          font-size: 13px; font-weight: 600; color: #fff;
+          background: #111; padding: 8px 16px; border-radius: 8px;
+          text-decoration: none;
+        }
+        .l-signup:hover { background: #333; }
+
+        /* ── Hero ── */
+        .l-hero {
+          max-width: 1080px; margin: 0 auto;
+          padding: 48px 28px 56px;
+          display: grid;
+          grid-template-columns: 1.1fr 0.9fr;
+          gap: 48px;
+          align-items: center;
+        }
+        .l-h1 {
+          font-family: 'Sora', sans-serif;
+          font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+          font-weight: 800; line-height: 1.05;
+          letter-spacing: -2px; color: #111;
+          margin: 0 0 20px;
+        }
+        .l-h1-green { color: #5C9C81; }
+        .l-sub {
+          font-size: 15px; line-height: 1.65; color: #666;
+          margin: 0 0 32px; max-width: 400px;
+        }
+        .l-ctas { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .l-cta-primary {
+          display: inline-flex; align-items: center; gap: 7px;
+          font-size: 14px; font-weight: 600;
+          background: #5C9C81; color: #fff;
+          padding: 11px 22px; border-radius: 9px;
+          text-decoration: none;
+        }
+        .l-cta-primary:hover { background: #4a8a70; }
+        .l-cta-ghost { font-size: 14px; color: #999; text-decoration: none; }
+        .l-cta-ghost:hover { color: #111; }
+
+        /* ── Stats row ── */
+        .l-stats {
+          display: flex; gap: 0;
+          margin-top: 40px; padding-top: 28px;
+          border-top: 1px solid #e2e2de;
+        }
+        .l-stat { flex: 1; }
+        .l-stat + .l-stat { padding-left: 24px; border-left: 1px solid #e2e2de; margin-left: 24px; }
+        .l-stat-val { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; color: #111; line-height: 1; }
+        .l-stat-label { font-size: 12px; color: #999; margin-top: 3px; }
+
+        /* ── Widget ── */
+        .l-widget {
+          background: #18181f;
+          border-radius: 14px;
+          overflow: hidden;
+          border: 1px solid #26262e;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+        .l-widget-chrome {
+          padding: 10px 14px;
+          background: #111116;
+          border-bottom: 1px solid #222228;
+          display: flex; align-items: center; gap: 7px;
+        }
+        .l-dot { width: 9px; height: 9px; border-radius: 50%; background: #333338; }
+        .l-url { margin-left: 8px; font-size: 10.5px; color: #44444c; font-family: monospace; }
+        .l-widget-body { padding: 18px 18px 20px; }
+        .l-widget-header {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 14px; padding-bottom: 14px;
+          border-bottom: 1px solid #222228;
+        }
+        .l-widget-name { font-size: 12px; font-weight: 600; color: #c0c0cc; }
+        .l-widget-meta { font-size: 11px; color: #44444c; margin-top: 2px; }
+        .l-score-ring {
+          width: 46px; height: 46px; border-radius: 50%;
+          border: 2px solid #5C9C81;
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          background: rgba(92,156,129,0.07); flex-shrink: 0;
+        }
+        .l-score-num { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 800; color: #fff; line-height: 1; }
+        .l-score-denom { font-size: 8px; color: #5C9C81; font-weight: 600; }
+        .l-rows { display: flex; flex-direction: column; gap: 2px; }
+        .l-row {
+          padding: 11px 12px; border-radius: 8px;
+          border: 1px solid transparent;
+          transition: all 0.3s ease;
+        }
+        .l-row-active { background: rgba(92,156,129,0.1); border-color: rgba(92,156,129,0.22); }
+        .l-row-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+        .l-col-name { font-size: 12.5px; font-weight: 600; line-height: 1.3; transition: color 0.3s; }
+        .l-col-name-active { color: #e8e8f0; }
+        .l-col-name-idle { color: #48484e; }
+        .l-col-dept { font-size: 11px; color: #38383e; margin-top: 2px; }
+        .l-tag {
+          font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 5px;
+          flex-shrink: 0; transition: all 0.3s;
+        }
+        .l-tag-top { background: rgba(92,156,129,0.15); color: #5C9C81; }
+        .l-tag-rec { background: rgba(255,255,255,0.04); color: #3a3a44; }
+        .l-score-text { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; transition: color 0.3s; }
+        .l-score-active { color: #fff; }
+        .l-score-idle { color: #38383e; }
+        .l-bar-wrap { margin-top: 10px; height: 2px; background: #222228; border-radius: 99px; overflow: hidden; }
+        .l-bar-fill { height: 100%; background: #5C9C81; border-radius: 99px; transition: width 0.55s cubic-bezier(0.4,0,0.2,1); }
+        .l-widget-footer {
+          margin-top: 14px; padding-top: 12px;
+          border-top: 1px solid #1e1e24;
+          display: flex; align-items: center; gap: 6px;
+        }
+        .l-widget-footer-text { font-size: 11px; color: #38383e; }
+        .l-widget-footer-time { margin-left: auto; font-size: 10px; color: #28282e; }
+
+        /* ── Dark band ── */
+        .l-band { background: #111; padding: 64px 28px; }
+        .l-band-inner { max-width: 1080px; margin: 0 auto; }
+        .l-band-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #5C9C81; margin: 0 0 36px; }
+        .l-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+        .l-step { padding-right: 36px; }
+        .l-step + .l-step { padding-left: 36px; border-left: 1px solid #222; }
+        .l-step-n { font-size: 11px; font-weight: 700; color: #5C9C81; display: block; margin-bottom: 12px; letter-spacing: 0.05em; }
+        .l-step-title { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 8px; line-height: 1.3; }
+        .l-step-body { font-size: 13px; line-height: 1.65; color: #666; margin: 0; }
+
+        /* ── Bottom CTA ── */
+        .l-bottom { max-width: 1080px; margin: 0 auto; padding: 72px 28px 80px; }
+        .l-bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+        .l-bottom-h2 {
+          font-family: 'Sora', sans-serif;
+          font-size: clamp(1.5rem, 2.5vw, 2rem);
+          font-weight: 800; color: #111;
+          letter-spacing: -0.8px; line-height: 1.1; margin: 0 0 12px;
+        }
+        .l-bottom-p { font-size: 14px; color: #888; line-height: 1.6; margin: 0; max-width: 340px; }
+        .l-bottom-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+        .l-bottom-btn {
+          font-size: 14px; font-weight: 650; color: #fff;
+          background: #111; padding: 12px 24px; border-radius: 9px;
+          text-decoration: none; display: inline-flex; align-items: center; gap: 7px;
+        }
+        .l-bottom-btn:hover { background: #333; }
+        .l-bottom-login { font-size: 13px; color: #bbb; text-decoration: none; }
+        .l-bottom-login:hover { color: #555; }
+
+        /* ── Footer ── */
+        .l-footer {
+          border-top: 1px solid #e2e2de; padding: 18px 28px;
+          max-width: 1080px; margin: 0 auto;
+          display: flex; justify-content: space-between; align-items: center;
+        }
+        .l-footer-logo { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 13px; color: #ccc; }
+        .l-footer-text { font-size: 11.5px; color: #bbb; }
+
+        /* ── MOBILE ── */
+        @media (max-width: 700px) {
+          .l-nav { padding: 18px 20px; }
+          .l-logo { font-size: 15px; }
+
+          .l-hero {
+            grid-template-columns: 1fr;
+            gap: 40px;
+            padding: 36px 20px 48px;
+          }
+          .l-h1 {
+            font-size: clamp(2rem, 9vw, 2.6rem);
+            letter-spacing: -1.5px;
+          }
+          .l-sub { font-size: 14px; max-width: 100%; }
+          .l-ctas { gap: 12px; }
+          .l-cta-primary { font-size: 13.5px; padding: 10px 18px; }
+
+          .l-stats { gap: 0; margin-top: 32px; }
+          .l-stat + .l-stat { padding-left: 16px; margin-left: 16px; }
+          .l-stat-val { font-size: 17px; }
+          .l-stat-label { font-size: 11px; }
+
+          /* Widget on mobile — keep it but compact */
+          .l-widget-body { padding: 14px 14px 16px; }
+          .l-url { display: none; }
+          .l-col-name { font-size: 11.5px; }
+          .l-col-dept { font-size: 10px; }
+
+          .l-band { padding: 48px 20px; }
+          .l-steps {
+            grid-template-columns: 1fr;
+            gap: 0;
+          }
+          .l-step { padding: 20px 0; border-left: none !important; padding-left: 0 !important; }
+          .l-step + .l-step { border-top: 1px solid #222; }
+          .l-step-title { font-size: 15px; }
+
+          .l-bottom { padding: 52px 20px 64px; }
+          .l-bottom-grid { grid-template-columns: 1fr; gap: 32px; }
+          .l-bottom-p { max-width: 100%; }
+          .l-bottom-actions { flex-direction: column; align-items: flex-start; }
+
+          .l-footer { padding: 16px 20px; flex-direction: column; gap: 6px; text-align: center; }
+        }
+
+        /* ── TABLET ── */
+        @media (min-width: 701px) and (max-width: 900px) {
+          .l-hero { grid-template-columns: 1fr; gap: 40px; padding: 40px 28px 52px; }
+          .l-h1 { font-size: 2.8rem; }
+          .l-sub { max-width: 520px; }
+          .l-steps { grid-template-columns: 1fr; gap: 0; }
+          .l-step { padding: 20px 0; border-left: none !important; padding-left: 0 !important; }
+          .l-step + .l-step { border-top: 1px solid #222; }
+          .l-bottom-grid { grid-template-columns: 1fr; gap: 32px; }
+        }
+      `}</style>
+
+      <div className="landing">
+
+        {/* Nav */}
+        <nav className="l-nav">
+          <Link to="/" className="l-logo">Collego</Link>
+          <div className="l-nav-links">
+            <Link to="/login" className="l-login">Log in</Link>
+            <Link to="/register" className="l-signup">Sign up free</Link>
+          </div>
+        </nav>
+
+        {/* Hero */}
+        <section className="l-hero">
+
+          {/* Left */}
+          <div>
+            <h1 className="l-h1">
+              Find the college<br />
+              <span className="l-h1-green">you'll actually</span><br />
+              get into.
+            </h1>
+            <p className="l-sub">
+              Enter your 12th marks once. Collego runs the cutoff formula against
+              every college and shows you exactly where you stand — no guesswork,
+              no paid listings.
+            </p>
+            <div className="l-ctas">
+              <Link to="/register" className="l-cta-primary">
+                See my colleges <ArrowRight size={14} />
+              </Link>
+              <Link to="/login" className="l-cta-ghost">
+                I have an account →
+              </Link>
             </div>
-            {i === activeIdx && (
-              <div style={{ marginTop: 10 }}>
-                <div style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 99, overflow: "hidden" }}>
-                  <div style={{
-                    height: "100%", borderRadius: 99, background: "#5C9C81",
-                    width: `${c.score}%`, transition: "width 0.6s ease"
-                  }} />
+
+            {/* Stats */}
+            <div className="l-stats">
+              <div className="l-stat">
+                <p className="l-stat-val">279</p>
+                <p className="l-stat-label">colleges indexed</p>
+              </div>
+              <div className="l-stat">
+                <p className="l-stat-val">TNEA</p>
+                <p className="l-stat-label">formula accurate</p>
+              </div>
+              <div className="l-stat">
+                <p className="l-stat-val">free</p>
+                <p className="l-stat-label">to start</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Widget */}
+          <div className="l-widget">
+            <div className="l-widget-chrome">
+              <span className="l-dot" /><span className="l-dot" /><span className="l-dot" />
+              <span className="l-url">collego.app/recommendations</span>
+            </div>
+            <div className="l-widget-body">
+              <div className="l-widget-header">
+                <div>
+                  <p className="l-widget-name">Your matches</p>
+                  <p className="l-widget-meta">90.4% · PCM+CS stream</p>
+                </div>
+                <div className="l-score-ring">
+                  <span className="l-score-num">{displayScore}</span>
+                  <span className="l-score-denom">/100</span>
                 </div>
               </div>
-            )}
+
+              <div className="l-rows">
+                {MOCK.map((c, i) => {
+                  const active = i === activeIdx;
+                  return (
+                    <div key={c.name} className={`l-row ${active ? "l-row-active" : ""}`}>
+                      <div className="l-row-inner">
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p className={`l-col-name ${active ? "l-col-name-active" : "l-col-name-idle"}`}
+                            style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {c.name}
+                          </p>
+                          <p className="l-col-dept">{c.dept}</p>
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <span className={`l-tag ${c.top ? "l-tag-top" : "l-tag-rec"}`} style={{ display: "block", marginBottom: 4 }}>
+                            {c.top ? "★ Top match" : "Recommended"}
+                          </span>
+                          <span className={`l-score-text ${active ? "l-score-active" : "l-score-idle"}`}>
+                            {c.score}%
+                          </span>
+                        </div>
+                      </div>
+                      {active && (
+                        <div className="l-bar-wrap">
+                          <div className="l-bar-fill" style={{ width: `${c.score}%` }} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="l-widget-footer">
+                <CheckCircle2 size={12} color="#5C9C81" />
+                <span className="l-widget-footer-text">Documents verified by counselor</span>
+                <span className="l-widget-footer-time">just now</span>
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
+        </section>
 
-      {/* Counselor note */}
-      <div style={{ marginTop: 16, padding: "10px 14px", background: "rgba(255,255,255,0.04)", borderRadius: 10, display: "flex", alignItems: "flex-start", gap: 10 }}>
-        <CheckCircle2 size={14} style={{ color: "#5C9C81", flexShrink: 0, marginTop: 1 }} />
-        <p style={{ fontSize: 11, color: "#5a5a60", lineHeight: 1.5 }}>
-          Documents verified · Counselor assigned
-        </p>
-      </div>
+        {/* Dark steps band */}
+        <div className="l-band">
+          <div className="l-band-inner">
+            <p className="l-band-label">How it works</p>
+            <div className="l-steps">
+              {[
+                { n: "Step 1", title: "Enter your marks", body: "12th percentage, stream, Maths/Physics/Chemistry if you have them. Collego calculates your cutoff automatically." },
+                { n: "Step 2", title: "Get a ranked list", body: "Every eligible college scored against your cutoff. Match %, fees, and ranking shown side by side." },
+                { n: "Step 3", title: "Track with a counselor", body: "A real counselor reviews your documents and updates your status as applications move forward." },
+              ].map(({ n, title, body }) => (
+                <div key={n} className="l-step">
+                  <span className="l-step-n">{n}</span>
+                  <h3 className="l-step-title">{title}</h3>
+                  <p className="l-step-body">{body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-      {/* Pagination dots */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 18 }}>
-        {MOCK_COLLEGES.map((_, i) => (
-          <div key={i} style={{
-            width: i === activeIdx ? 18 : 5, height: 5, borderRadius: 99,
-            background: i === activeIdx ? "#5C9C81" : "#2a2a30",
-            transition: "all 0.3s ease"
-          }} />
-        ))}
-      </div>
-    </div>
-  );
-}
+        {/* Bottom CTA */}
+        <div className="l-bottom">
+          <div className="l-bottom-grid">
+            <div>
+              <h2 className="l-bottom-h2">
+                Your marks are in.<br />
+                Your list isn't.
+              </h2>
+              <p className="l-bottom-p">
+                Takes three minutes. No consultant fee, no waiting.
+                Just your marks and a ranked list of colleges you can actually get into.
+              </p>
+            </div>
+            <div className="l-bottom-actions">
+              <Link to="/register" className="l-bottom-btn">
+                Create free account <ArrowRight size={14} />
+              </Link>
+              <Link to="/login" className="l-bottom-login">
+                Already have an account? Log in
+              </Link>
+            </div>
+          </div>
+        </div>
 
-function Proof({ value, label }) {
-  return (
-    <div>
-      <p style={{ fontFamily: "'Sora', sans-serif", fontSize: 18, fontWeight: 800, color: "#15151A", lineHeight: 1 }}>{value}</p>
-      <p style={{ fontSize: 11, color: "#9b9b9f", marginTop: 3 }}>{label}</p>
-    </div>
+        {/* Footer */}
+        <footer className="l-footer">
+          <span className="l-footer-logo">Collego</span>
+          <span className="l-footer-text">Built by Varshini · {new Date().getFullYear()}</span>
+        </footer>
+
+      </div>
+    </>
   );
 }
